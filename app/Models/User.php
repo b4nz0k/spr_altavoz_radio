@@ -23,6 +23,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'image',
+        'nivel',
+        'estacion_radio_id',
+        'estatus',
     ];
 
     /**
@@ -45,7 +49,14 @@ class User extends Authenticatable
     ];
 
     protected $dates = ['deleted_at'];
-
+    protected $appends = ['nivel_nombre'];
+    public function getnivelnombreAttribute() {
+        if($this->nivel == 1 ) return 'Usuario';
+        elseif($this->nivel == 2 ) return 'Gestion';
+        elseif($this->nivel == 3 ) return 'Supervisor';
+        elseif($this->nivel == 4 ) return 'Administrador';
+        else  return "Sin Nivel";
+    }
     public function estacion_radio()
     {
         return $this->hasOne(EstacionRadio::class, 'id', 'estacion_radio_id');

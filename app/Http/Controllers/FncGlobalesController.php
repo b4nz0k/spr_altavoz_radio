@@ -11,7 +11,7 @@ use App\Models\Gnrl\GnrlMovimientos;
 
 class FncGlobalesController extends Controller
 {
-    
+
     public function logs($debug, $estatus, $getMessage, $getCode, $getLine, $getFile)
     {
         try {
@@ -72,7 +72,7 @@ class FncGlobalesController extends Controller
         if ($longitud < 4) {
             $longitud = 4;
         }
-    
+
         return bin2hex(random_bytes(($longitud - ($longitud % 2)) / 2));
     }
 
@@ -126,7 +126,7 @@ class FncGlobalesController extends Controller
         try {
             if ($request->hasFile('imagen')) {
                 $file = $request->file('imagen');
-    
+
                 $nombre_encriptado = md5($file->getClientOriginalName() . Carbon::now()->toDateTimeString());
                 $uploadFiles = new UploadFiles();
                 $uploadFiles->estacion_radio_id = \Auth::user()->estacion_radio_id;
@@ -139,7 +139,7 @@ class FncGlobalesController extends Controller
                 } else {
                     $uploadFiles->file_tipo = 'audio';
                 }
-    
+
                 $uploadFiles->save();
                 $file->move('upload', $nombre_encriptado . '.' . $file->getClientOriginalExtension());
                 return '/upload/' . $nombre_encriptado . '.' . $file->getClientOriginalExtension();

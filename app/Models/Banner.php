@@ -15,6 +15,7 @@ class Banner extends Model
     protected $fillable = [
         'programas_id',
         'status',
+        'estacion_id',
         'fecha_inicio',
         'fecha_fin',
         'link',
@@ -27,16 +28,38 @@ class Banner extends Model
 
     protected $table = 'banner';
 
-    protected $appends = ['programa_titulo', 'programa_subtitulo', 'programa_banner'];
+    protected $appends = ['programa_titulo', 'programa_subtitulo', 'programa_banner', 'programa_destacado', 'estaciones_lista'];
 
     public function getprogramatituloAttribute() {
-        return Programas::find($this->programas_id)->titulo;
+        if ($this->programas_id)
+            return Programas::find($this->programas_id)->titulo;
+        else
+            return 'Sin Titulo';
     }
     public function getprogramasubtituloAttribute() {
-        return Programas::find($this->programas_id)->subtitulo;
+        if ($this->programas_id)
+            return Programas::find($this->programas_id)->subtitulo;
+        else
+            return 'Sin subtitulo';
+
     }
     public function getprogramabannerAttribute() {
-        return Programas::find($this->programas_id)->imagen_banner;
+        if ($this->programas_id)
+            // return Programas::find($this->programas_id)->imagen_banner;
+            return Programas::find($this->programas_id)->imagen_destacada;
+        else
+            return 'Sin Imagen';
+    }
+    public function getprogramadestacadoAttribute() {
+        if ($this->programas_id)
+            return Programas::find($this->programas_id)->imagen_banner;
+            // return Programas::find($this->programas_id)->imagen_destacada;
+        else
+            return 'Sin Imagen';
+    }
+    public function getestacioneslistaAttribute() {
+        if ($this->programas_ids)
+            return Programas::find($this->programas_ids)->estacioneslista;
     }
 
     public static function programasMes() {
@@ -46,7 +69,6 @@ class Banner extends Model
     }
     public static function programasTodos() {
         return Programas::all();
-
     }
 
 }

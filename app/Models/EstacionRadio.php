@@ -12,11 +12,12 @@ class EstacionRadio extends Model
     use SoftDeletes;
 
     protected $fillable = [
+        'id',
         'estacion',
         'descripcion',
     ];
 
-    protected $table = 'estacion_radio';
+    protected $table = 'estacion_radio2';
 
     protected $casts = [
         'created_at' => 'datetime:d-m-Y',

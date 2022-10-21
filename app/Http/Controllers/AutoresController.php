@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Throwable;
+use App\Models\Autores;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class AutoresController extends Controller
 {
@@ -13,22 +17,17 @@ class AutoresController extends Controller
         $this->funcion = new FncGlobalesController();
     }
 
-    public function listado($estatus)
+    public function listado()
     {
         try {
-            $listAutores = [];
+            $autores = Autores::Select(
+                                    'id',
+                                    'autor',
+                                    'token'
+                                    )->paginate(10);
+            return ($autores);
 
-            $autores = Autores::all();
-
-            foreach ($autores as $autor) {
-                array_push($listAutores, [
-                    'id'               => $programa->id,
-                    'autor'            => $autor->autor,
-                ]);
-            }
-            return $listAutores;
-
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $this->funcion->logs( 'Backend', '500', $th->getMessage(), $th->getCode(), $th->getLine(), $th->getFile());
             return response()->json([
                 'answer' => false,
@@ -41,7 +40,8 @@ class AutoresController extends Controller
     public function agregar(Request $request)
     {
         try {
-            $validator = \Validator::make($request->all(), [
+            // return response()->json('agregando registro');
+            $validator = Validator::make($request->all(), [
                 'autor' => ['required'],
             ]);
 
@@ -52,9 +52,9 @@ class AutoresController extends Controller
                 ]);
             }
 
-            $autor = new Autor();
-            $autor->autor                = $request->input('titulo');
-            $autor->usuario_id           = \Auth::user()->id;
+            $autor = new Autores();
+            $autor->autor                = $request->input('autor');
+            $autor->usuario_id           = Auth::user()->id;
             $autor->token                = $this->funcion->token(20);
             $autor->save();
 
@@ -72,11 +72,71 @@ class AutoresController extends Controller
             ]);
         }
     }
-
-    public function editar(Request $request)
-    {
+    public function search(Request $request) {
         try {
-            $validator = \Validator::make($request->all(), [
+            // return response()->json($request->all());
+
+            $this->validate($request, [
+                'search' => 'required'
+            ]);
+
+            $se = $request->input('search');
+            $busqueda = Autores::where('autor', 'like', '%'.$se.'%');
+            // return response()->json('asignando variable search');
+
+            return $busqueda->paginate(5);
+        } catch (\Throwable $th) {
+            $this->funcion->logs( 'Backend', '500', $th->getMessage(), $th->getCode(), $th->getLine(), $th->getFile());
+            return response()->json([
+                'answer' => false,
+                'msg' => 'Algo ha salido mal, inténtalo de nuevo.',
+                'php'    => $th->getMessage(),
+            ]);
+        }
+    }
+    public function actualizar(Request $request) {
+        try {
+            if ($autor = Autores::find($request->input('id')));
+                    $autor->autor = $request->input('autor');
+                    $autor->save();
+                    return response()->json([
+                        'answer' => true,
+                        'msg' => 'El registro se ha actualizado exitosamente.',
+                    ]);
+
+        } catch (\Throwable $th) {
+            $this->funcion->logs( 'Backend', '500', $th->getMessage(), $th->getCode(), $th->getLine(), $th->getFile());
+            return response()->json([
+                'answer' => false,
+                'msg' => 'Algo ha salido mal, inténtalo de nuevo.',
+                'php'    => $th->getMessage(),
+            ]);
+        }
+
+    }
+    public function eliminar($id) {
+        try {
+            // return response()->json('desde la funcion de eliminar');
+            if (Autores::find($id)->delete()) {
+                return response()->json([
+                    'answer' => true,
+                    'msg' => 'El registro se ha eliminado exitosamente.',
+                ]);
+            }
+        } catch (\Throwable $th) {
+            $this->funcion->logs( 'Backend', '500', $th->getMessage(), $th->getCode(), $th->getLine(), $th->getFile());
+            return response()->json([
+                'answer' => false,
+                'msg' => 'Algo ha salido mal, inténtalo de nuevo.',
+                'php'    => $th->getMessage(),
+            ]);
+        }
+    }
+
+  /*  public function editar(Request $request)
+    {
+         try {
+            $validator = Validator::make($request->all(), [
                 'autor' => ['required'],
             ]);
 
@@ -86,18 +146,18 @@ class AutoresController extends Controller
                     'autor'     => $validator->errors()->first('autor'),
                 ]);
             }
-            
+
             $buscarAutor = Autores::where('token', $request->input('token'))->first();
 
-            $autor = Autores::find($buscarPrograma->id);
+            $autor = Autores::find($buscarAutor->id);
             $autor->titulo               = $request->input('titulo');
             $autor->subtitulo            = $request->input('subtitulo');
             $autor->contenido            = $request->input('contenido');
             $autor->autor                = $request->input('autor');
             $autor->estatus              = $request->input('estatus');
-            $autor->usuario_id           = \Auth::user()->id;
-            $autor->estacion_radio_id    = \Auth::user()->estacion_radio_id;
-            
+            $autor->usuario_id           = Auth::user()->id;
+            $autor->estacion_radio_id    = Auth::user()->estacion_radio_id;
+
             if ($request->hasFile('imagen_destacada')) {
                 $programa->imagen_destacada     =  $this->funcion->save_file($request->file('imagen_destacada'), 'upload');
             }
@@ -121,5 +181,5 @@ class AutoresController extends Controller
                 'php'    => $th->getMessage(),
             ]);
         }
-    }
+    } */
 }
