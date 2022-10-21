@@ -7,6 +7,9 @@ import snackbars from './modules/snackbars';
 import sheets from './modules/sheets';
 import dialog from './modules/dialog';
 import dataTable from './modules/dataTable';
+import modCaregorias from './modules/categorias';
+import modExcel from './modules/excel'
+import modSelect from './modules/select'
 
 Vue.use(Vuex);
 
@@ -16,6 +19,12 @@ export const store = new Vuex.Store({
         snackbars,
         sheets,
         dialog,
-        dataTable
+        dataTable,
+        cat: modCaregorias,
+        excel: modExcel,
+        select: modSelect
+    },
+    actions: {
+
     }
 })

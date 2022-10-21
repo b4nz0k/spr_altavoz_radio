@@ -2,18 +2,96 @@
 <v-container>
     <v-form ref="form" v-on:submit.prevent>
         <v-row>
-            <v-col cols="12" xl="8">
-                <v-card class="elevation-0 py-8 pl-8 pr-8">
+                <v-col cols="12" lg="12" xl="12">
+                <v-card class="elevation-0  pl-8 pr-8">
                     <v-container>
                         <v-row>
-                            <v-col cols="12" xl="12">
-                                <v-text-field v-model="vmodel_titulo" name="tituloPrograma" label="Título" placeholder="Título" hint="* Campo requerido" autocomplete="off" required persistent-hint outlined dense></v-text-field>
+                            <!-- Titulo -->
+                            <v-col cols="12" xl="12" class="mt-6">
+                                <v-text-field v-model="vmodel_titulo" name="tituloPrograma" label="Título"
+                                placeholder="Título" hint="* Campo requerido" autocomplete="off"
+                                required persistent-hint outlined dense></v-text-field>
                             </v-col>
-                            <v-col cols="12" xl="12">
-                                <v-text-field v-model="vmodel_subtitulo" name="subtituloPrograma" label="Subtítulo" placeholder="Subtítulo" hint="* Campo requerido" autocomplete="off" required persistent-hint outlined dense></v-text-field>
+                                <v-col
+                                cols="12"
+                                sm="6"
+                                >
+                                <v-select
+                                    v-model="valueEstaciones"
+                                    :items="listCatEstaciones"
+                                    item-value="id"
+                                    item-text="estacion"
+                                    chips
+                                    label="Estaciones"
+                                    multiple
+                                    outlined
+                                >
+                                    <template #selection="{ item }">
+                                        <v-chip dark color="success">{{item.estacion}}
+                                        </v-chip>
+                                    </template>
+
+                                </v-select>
+                                                            <!-- Autor -->
+<!-- probando componente -->
+                                <v-col cols="12" xl="12">
+
+    <SelectPaginateVue
+    :paginacion="url.getAutor"
+    :paginacionSearch="url.getAutorSearch"
+    :retornarItem="catAutores"
+    itemValue="id"
+    itemText="autor"
+    itemLabel="Autor"
+
+    />
+
+
+<!--                                 </v-col>
+                                <v-col cols="12" xl="12">
+                                <v-select
+                                v-model="vmodel_autor"
+                                :items="listAutores"
+                                item-value="id"
+                                item-text="autor"
+                                name="autor"
+                                placeholder="Autor"
+                                label="Autor"
+                                outlined
+                                >
+                                </v-select> -->
                             </v-col>
+
+                                </v-col>
+                                <v-col cols="5">
+                                    <v-card shaped tile d-flex>
+                                        <v-card-text v-if="vmodel_imagenDestacada">
+                                                    <v-avatar color="primary" width="75%" height="75%" tile hover class="elevation-1">
+                                                        <v-img :src="vmodel_imagenDestacada" aspect-ratio="1.7"></v-img>
+                                                    </v-avatar>
+
+                                        </v-card-text>
+                                        <v-card-text>
+                                            <v-col cols="12">
+                                                <v-file-input v-model="vmodel_path_destacada" @change="mostrarImagenDestacada" hint="* Campo requerido" persistent-hint prepend-icon="mdi-camera" required show-size truncate-length="20" accept="image/png, image/jpeg, image/jpg" placeholder="Imagen Destacada" label="Imagen Destacada"></v-file-input>
+                                            </v-col>
+                                            <v-col cols="12" class="d-flex justify-end">
+                                                <widget-galeria file_tipo="imagen"></widget-galeria>
+                                            </v-col>
+                                        </v-card-text>
+                                    </v-card>
+
+                                </v-col>
+
+                            <!-- Subtitulo -->
+                            <v-col cols="12" xl="12">
+                                <v-text-field v-model="vmodel_subtitulo"
+                                name="subtituloPrograma" label="Subtítulo" placeholder="Subtítulo" hint="* Campo requerido" autocomplete="off" required persistent-hint outlined dense></v-text-field>
+                            </v-col>
+
                         </v-row>
                         <v-row>
+                            <!-- Contenido -->
                             <v-col cols="12" xl="12">
                                 <ckeditor v-model="vmodel_ckeditor" :editor="editor" :config="editorConfig"></ckeditor>
                             </v-col>
@@ -29,130 +107,53 @@
                             </v-col>
                         </v-row> -->
                     </v-container>
+                    <v-card-title class="mb-5">
+                        <v-spacer></v-spacer>
+                        <v-btn
+                                @click="programa(1)"
+                                dark
+                                x-large
+                                left
+                                rounded
+                                class="mx-3 mt-8"
+                                color="success"
+                                >
+                                    {{ estatus == 1 ? 'Actualizar' : 'Publicar' }}
+                                </v-btn>
+                                <v-btn
+                                @click="programa(2)"
+                                outlined dark
+                                x-large
+                                right
+                                rounded
+                                class="mx-3 mt-8"
+                                color="primary"
+                                >
+                                    {{ estatus == 2 ? 'Guardar' : 'Borrador'}}
+                                </v-btn>
+                </v-card-title>
                 </v-card>
             </v-col>
-            <v-col cols="12" xl="4">
+
+            <v-col cols="4" xl="4">
                 <v-row>
                     <v-col cols="12">
-                        <v-expansion-panels v-model="vmodel_panel" hover focusable>
-                            <v-expansion-panel>
-                                <v-expansion-panel-header>Imagen Destacada</v-expansion-panel-header>
-                                <v-expansion-panel-content>
-                                    <v-container>
-                                        <v-row>
-                                            <v-col cols="12" v-if="vmodel_imagenDestacada">
-                                                <center>
-                                                    <v-avatar color="primary" size="350" width="450" tile hover class="elevation-1">
-                                                        <v-img :src="vmodel_imagenDestacada" aspect-ratio="1.7"></v-img>
-                                                    </v-avatar>
-                                                </center>
-                                            </v-col>
-                                        </v-row>
-                                        <v-row>
-                                            <v-col cols="12">
-                                                <v-file-input v-model="vmodel_path_destacada" @change="mostrarImagenDestacada" hint="* Campo requerido" persistent-hint prepend-icon="mdi-camera" required show-size truncate-length="20" accept="image/png, image/jpeg, image/jpg" placeholder="Imagen Destacada" label="Imagen Destacada"></v-file-input>
-                                            </v-col>
-                                            <v-col cols="12" class="d-flex justify-end">
-                                                <widget-galeria file_tipo="imagen"></widget-galeria>
-                                            </v-col>
-                                        </v-row>
-                                    </v-container>
-                                </v-expansion-panel-content>
-                            </v-expansion-panel>
-                            <v-expansion-panel>
-                                <v-expansion-panel-header>Imagen Banner</v-expansion-panel-header>
-                                <v-expansion-panel-content>
-                                    <v-container>
-                                        <v-row>
-                                            <v-col cols="12" v-if="vmodel_imagenBanner">
-                                                <center>
-                                                    <v-avatar color="greey" size="350" width="450" tile hover class="elevation-1">
-                                                        <v-img :src="vmodel_imagenBanner" aspect-ratio="1.7"></v-img>
-                                                    </v-avatar>
-                                                </center>
-
-                                            </v-col>
-                                        </v-row>
-                                        <v-row>
-                                            <v-col cols="12">
-                                                <v-file-input v-model="vmodel_path_banner" @change="mostrarImagenBanner" hint="* Campo requerido" persistent-hint prepend-icon="mdi-camera" required show-size truncate-length="20" accept="image/png, image/jpeg, image/jpg" placeholder="Imagen Banner" label="Imagen Banner"></v-file-input>
-                                            </v-col>
-                                            <v-col cols="12" class="d-flex justify-end">
-                                                <widget-galeria file_tipo="imagen"></widget-galeria>
-                                            </v-col>
-                                        </v-row>
-                                        <v-row>
-                                            <v-col cols="12">
-                                                <ul>
-                                                    <li>El banner debe tener las siguientes dimensiones 1920 x 1080.</li>
-                                                </ul>
-                                            </v-col>
-                                        </v-row>
-                                    </v-container>
-                                </v-expansion-panel-content>
-                            </v-expansion-panel>
-                            <v-expansion-panel>
-                                <v-expansion-panel-header>Autor</v-expansion-panel-header>
-                                <v-expansion-panel-content>
-                                    <v-container>
-                                        <v-row>
-                                            <v-col cols="12">
-                                                <!-- <v-text-field v-model="vmodel_autor" name="autor" label="Autor" placeholder="Autor" outlined dense></v-text-field> -->
-                                                <v-autocomplete v-model="vmodel_autor" name="autor" label="Autor" placeholder="Autor" :items="listAutores" item-text="autor" item-value="id" clearable outlined dense></v-autocomplete>
-                                            </v-col>
-                                        </v-row>
-                                    </v-container>
-                                </v-expansion-panel-content>
-                            </v-expansion-panel>
-                        </v-expansion-panels>
-                    </v-col>
-                    <v-col cols="12">
-                        <v-expansion-panels v-model="vmodel_panel_publish" hover focusable>
-                            <v-expansion-panel>
-                                <v-expansion-panel-header>Publicar</v-expansion-panel-header>
-                                <v-expansion-panel-content>
-                                    <v-container>
-                                        <v-row>
-                                            <v-col cols="12">
-                                                <ul>
-                                                    <li>Guardar, no será público hasta que no cambie su estatus de publicación.</li>
-                                                    <li>Publicar, inmediatamente se verá reflejado en el portal.</li>
-                                                </ul>
-                                            </v-col>
-                                        </v-row>
-                                        <v-row>
-                                            <v-col cols="12">
-                                                <span v-if="estatus == 1">
-                                                    <v-btn class="float-right mr-2" text outlined small color="primary" @click="programa(2)">Borrador</v-btn>
-                                                    <v-btn class="float-right mr-2" text outlined small color="primary" @click="programa(1)">Actualizar</v-btn>
-                                                </span>
-                                                <span v-else-if="estatus == 2">
-                                                    <v-btn class="float-right mr-2" text outlined small color="primary" @click="programa(2)">Guardar</v-btn>
-                                                    <v-btn class="float-right mr-2" text outlined small color="primary" @click="programa(1)">Publicar</v-btn>
-                                                </span>
-                                                <span v-else>
-                                                    <v-btn class="float-right mr-2" text outlined small color="primary" @click="programa(2)">Borrador</v-btn>
-                                                    <v-btn class="float-right mr-2" text outlined small color="primary" @click="programa(1)">Publicar</v-btn>
-                                                </span>
-                                            </v-col>
-                                        </v-row>
-                                    </v-container>
-                                </v-expansion-panel-content>
-                            </v-expansion-panel>
+                        <v-expansion-panels v-model="vmodel_panel" multiple>
                         </v-expansion-panels>
                     </v-col>
                 </v-row>
             </v-col>
         </v-row>
+
     </v-form>
 </v-container>
 </template>
 
 <script>
+import SelectPaginateVue from '../../components/utils/SelectPaginate.vue'
 import CKEditor from "@ckeditor/ckeditor5-vue2";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import {
-    mapState,
     mapMutations,
     mapGetters
 } from "vuex";
@@ -174,7 +175,6 @@ class MyUploadAdapter {
                 });
             }));
     }
-
 }
 
 function MyUploadAdapterPlugin(editor) {
@@ -183,12 +183,18 @@ function MyUploadAdapterPlugin(editor) {
     };
 }
 export default {
-    props: [],
     components: {
-        ckeditor: CKEditor.component
+        ckeditor: CKEditor.component,
+        SelectPaginateVue
+
     },
     data: () => ({
-        vmodel_panel: 0,
+        fabiconSelect: {
+            saved: 'mdi-file-upload-outline',
+            listo: 'mdi-check'
+
+        },
+        vmodel_panel: [0, 1],
         vmodel_panel_publish: 0,
         vmodel_titulo: '',
         vmodel_subtitulo: '',
@@ -207,16 +213,24 @@ export default {
         vmodel_estacion: [],
         listCatEstaciones: [],
         listChipsEstaciones: [],
-        listAutores: [],
+        listAutores:[],
+        valueEstaciones: [],
         estatus: '',
+        url: {
+            getAutor: 'autor/list?page=',
+            getAutorSearch: 'autor/search?page=',
+
+        }
     }),
-    beforeCreate() {},
     created() {
         //this.catEstacionRadio();
         this.obtenerInfo();
+        // this.catAutores();
+        this.catEstacionRadio();
     },
     mounted() {},
     computed: {
+        ...mapGetters('cat', ['getItem']),
         ...mapGetters(['getDialogGaleriaPath',]),
     },
     watch: {
@@ -235,12 +249,16 @@ export default {
     },
     methods: {
         ...mapMutations(['setDialogGaleriaPath']),
-        catAutores() {
-            axios.get('').then(response => {
+        catAutores(autor) {
+            this.vmodel_autor = autor
+            console.log('desde el componente padre, el autor es,',this.vmodel_autor)
+            // axios.get('autor/list').then(response => {
+            //     this.listAutores = response.data.data
+                // console.log(response.data)
 
-            }).catch(error => {
-
-            });
+            // }).catch(error => {
+            //     console.log(error)
+            // });
         },
 
         changeEstaciones() {
@@ -257,8 +275,10 @@ export default {
         catEstacionRadio() {
             axios.get('cat/estacion-radio').then(response => {
                 this.listCatEstaciones = response.data;
+                // console.log(response.data)
             });
         },
+
 
         removeEstacion(item) {
             const index = this.vmodel_estacion.indexOf(item.id)
@@ -296,7 +316,7 @@ export default {
 
         guardar(estatus) {
             this.$refs.form.validate();
-            if (this.vmodel_titulo != '' && this.vmodel_subtitulo != '' && this.vmodel_path_destacada != null && this.vmodel_path_banner != null) {
+            if (this.vmodel_titulo != '' && this.vmodel_subtitulo != '' && this.vmodel_path_destacada != null ) {
                 let formData = new FormData();
 
                 formData.append('titulo', this.vmodel_titulo);
@@ -304,10 +324,14 @@ export default {
                 formData.append('contenido', this.vmodel_ckeditor);
                 formData.append('imagen_destacada', this.vmodel_path_destacada);
                 formData.append('imagen_banner', this.vmodel_path_banner);
+                formData.append('autor', this.vmodel_autor);
                 formData.append('estatus', estatus);
+                formData.append('estaciones_ids', this.valueEstaciones.toString());
                 // formData.append('estaciones', this.vmodel_estacion);
 
                 axios.post('programa/add', formData).then(response => {
+                    console.log(response.data);
+
                     if (response.data.answer) {
                         this.$refs.form.reset();
                         this.$store.dispatch('sanckbarsMessage', [response.data.msg, 'success', true, '', ['top', 'right']]);
@@ -346,17 +370,19 @@ export default {
             this.$refs.form.validate();
             if (this.vmodel_titulo != '' && this.vmodel_subtitulo != '') {
                 let formData = new FormData();
-
+                formData.append('id', this.getItem.id )
                 formData.append('token', this.$route.params.token);
                 formData.append('titulo', this.vmodel_titulo);
                 formData.append('subtitulo', this.vmodel_subtitulo);
                 formData.append('contenido', this.vmodel_ckeditor);
                 formData.append('imagen_destacada', this.vmodel_path_destacada);
                 formData.append('imagen_banner', this.vmodel_path_banner);
+                formData.append('estaciones_ids', this.valueEstaciones.toString());
                 formData.append('estatus', estatus);
                 // formData.append('estaciones', this.vmodel_estacion);
 
                 axios.post('programa/edit', formData).then(response => {
+                    console.log(response.data)
                     if (response.data.answer) {
                         this.$refs.form.reset();
                         this.$store.dispatch('sanckbarsMessage', [response.data.msg, 'success', true, '', ['top', 'right']]);
@@ -407,6 +433,9 @@ export default {
                         this.vmodel_imagenDestacada = response.data.imagen_destacada;
                         this.vmodel_imagenBanner = response.data.imagen_banner;
                         this.estatus = response.data.estatus;
+                        // Sacamos Sacamos por medio de un string convertimos en un array y entero para saber el numero de las estaciones de la publicacion
+                        this.valueEstaciones = response.data.estaciones_ids.split(',').map(Number)
+                        // console.log(this.valueEstaciones)
                     } else {
                         this.$router.push({
                             path: '/page-error'

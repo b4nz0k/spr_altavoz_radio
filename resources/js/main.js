@@ -9,8 +9,19 @@ import { store } from './store/store'
 import vuetify from './plugins/vuetify';
 import axios from 'axios';
 import Vuetify from 'vuetify';
+import TextareaAutosize from 'vue-textarea-autosize'
+import LaravelVuePagination from 'laravel-vue-pagination';
+
+Vue.use(TextareaAutosize)
+
 // Draggable
 import draggable from 'vuedraggable'
+/* import DaySpanVuetify from 'dayspan-vuetify'
+Vue.use(DaySpanVuetify, {
+    methods: {
+      getDefaultEventColor: () => '#1976d2'
+    }
+  }); */
 
 router.beforeEach((to, from, next) => {
     axios.get('/usuario/info').then(response => {
@@ -49,6 +60,7 @@ router.beforeEach((to, from, next) => {
 router.afterEach((to, from) => {
 });
 
+Vue.component('pagination', require('laravel-vue-pagination'));
 
 Vue.component('programa-crud', require('./components/programa/ProgramaComponent.vue').default);
 Vue.component('programa-list', require('./components/programa/ListProgramaComponent.vue').default);

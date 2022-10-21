@@ -72,11 +72,11 @@
                         </v-list-item-content>
                     </v-list-item>
                 </v-list-group> -->
-                <v-list-item v-else :key="item.text" link>
+                <v-list-item v-else :key="item.text" link :to="item.path">
                     <v-list-item-action>
                         <v-icon>{{ item.icon }}</v-icon>
                     </v-list-item-action>
-                    <v-list-item-content>
+                    <v-list-item-content  >
                         <router-link :to="item.path" class="router-link">
                             <v-list-item-title>
                                 {{ item.text }}
@@ -84,7 +84,33 @@
                         </router-link>
                     </v-list-item-content>
                 </v-list-item>
+
             </template>
+
+            <v-list-item to="/usuarios" link v-if="user.nivel > 3">
+                <v-list-item-action>
+                    <v-icon> mdi-account-key  </v-icon>
+                </v-list-item-action>
+
+                <v-list-item-content  >
+                        <v-list-item-title>
+                                Usuarios
+                        </v-list-item-title>
+                    </v-list-item-content>
+            </v-list-item>
+
+            <v-list-item to="/estaciones" link v-if="user.nivel > 3">
+                <v-list-item-action>
+                    <v-icon> mdi-radio  </v-icon>
+                </v-list-item-action>
+
+                <v-list-item-content  >
+                        <v-list-item-title>
+                                Estaciones
+                        </v-list-item-title>
+                    </v-list-item-content>
+            </v-list-item>
+
         </v-list>
     </v-navigation-drawer>
 
@@ -97,19 +123,51 @@
                 </router-link>
             </span>
         </v-toolbar-title>
-        <v-text-field flat solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search" class="hidden-sm-and-down"></v-text-field>
         <v-spacer></v-spacer>
-        <v-btn icon>
-            <v-icon>mdi-apps</v-icon>
-        </v-btn>
-        <v-btn icon>
-            <v-icon>mdi-bell</v-icon>
-        </v-btn>
-        <v-btn icon large>
-            <v-avatar size="32px" item>
-                <v-img src="https://cdn.vuetifyjs.com/images/logos/logo.svg" alt="Vuetify"></v-img>
-            </v-avatar>
-        </v-btn>
+        <v-chip
+            class="ma-2"
+            color="success"
+            label
+            text-color="white"
+            >
+                <v-icon left>
+                    mdi-label
+                </v-icon>
+                <h2>
+                    Estacion : {{infoUsuario.estacion}}
+                </h2>
+    </v-chip>
+        <v-spacer></v-spacer>
+                <v-menu
+                bottom
+                left
+                offset-y
+                origin="top right"
+                transition="scale-transition"
+            >
+                <template v-slot:activator="{ on }">
+                <v-btn dark icon v-on="on" class="mr-1">
+                    <v-avatar color="secondary" size="50">
+                        <span class="white--text headline">
+                            <strong>{{ infoUsuario.letter }}</strong>
+                        </span>
+                    </v-avatar>
+                </v-btn>
+                </template>
+
+                <v-list>
+                <v-list-item to="/user"
+                >
+                    <v-list-item-title>Perfil</v-list-item-title>
+                </v-list-item>
+                <v-list-item
+                    to="logout"
+                >
+                    <v-list-item-title>Cerrar Session</v-list-item-title>
+                </v-list-item>
+                </v-list>
+            </v-menu>
+
     </v-app-bar>
     <v-main>
         <transition name="fade" mode="out-in">
@@ -144,6 +202,8 @@ import {
 } from "vuex";
 
 import AppConfig from 'Constants/AppConfig';
+import { Store } from "vuex";
+import auth from "./store/modules/auth";
 export default {
     props: {
         source: String,
@@ -271,6 +331,9 @@ export default {
     mounted() {},
     computed: {
         ...mapGetters(['infoUsuario',]),
+        ...mapState({
+        user: ({ auth: { info_usuario } }) => info_usuario,
+        }),
     },
     watch: {},
     methods: {
@@ -280,6 +343,7 @@ export default {
 
         closeSesion() {
             this.$store.dispatch('singOff');
+
         },
     },
 };

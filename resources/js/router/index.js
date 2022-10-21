@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 
 import Home from 'Views/home/Home';
 import PageError from 'Views/error/PageError';
-
+import Perfil from 'Views/usuarios/Perfil.vue';
 import Categoria from 'Views/categoria/Categoria';
 
 import ProgramaAdd from 'Views/programa/ProgramaAgregar';
@@ -22,10 +22,18 @@ import MultimediaAdd from 'Views/multimedia/MultimediaAgregar';
 import MultimediaEdit from 'Views/multimedia/MultimediaEditar';
 import Multimedia from 'Views/multimedia/Multimedia';
 
+import Autores from 'Views/autor/autor';
+
+import Productores from 'Views/productor/Productor'
+
 import Programacion from 'Views/programacion/Programacion';
+import Prog2 from 'Views/programacion/Programacion2';
 
 // Divicion -----------
 import Banner from 'Views/banner/Banner';
+
+import UsuariosAdm from 'Views/usuarios/Usuarios'
+import EstacionesAdm from 'Views/estaciones/Estaciones'
 
 Vue.use(VueRouter)
 
@@ -33,6 +41,10 @@ const routes = [
     {
         path: '/home',
         component: Home,
+    },
+    {
+        path: '/user',
+        component: Perfil,
     },
     {
         path: '/',
@@ -367,6 +379,102 @@ const routes = [
         beforeEnter: (to, from, next) => {
             axios.get('usuario/info').then(response => {
                 if (response.data.estatus) {
+                    next();
+                } else {
+                    next('/page-error');
+                }
+            }).catch(error => {
+                if (error.response.status == 401) {
+                    console.log('Unauthorized');
+                }
+                if (error.response.status == 419) {
+                    console.log('CFRC');
+                }
+                if (error.response.status == 500) {
+                    console.log('Server Error');
+                }
+            });
+        }
+    },
+    {
+        path: '/autores',
+        component: Autores,
+        name: 'autores',
+        beforeEnter: (to, from, next) => {
+            axios.get('usuario/info').then(response => {
+                if (response.data.estatus) {
+                    next();
+                } else {
+                    next('/page-error');
+                }
+            }).catch(error => {
+                if (error.response.status == 401) {
+                    console.log('Unauthorized');
+                }
+                if (error.response.status == 419) {
+                    console.log('CFRC');
+                }
+                if (error.response.status == 500) {
+                    console.log('Server Error');
+                }
+            });
+        }
+    },
+    {
+        path: '/productores',
+        component: Productores,
+        name: 'productores',
+        beforeEnter: (to, from, next) => {
+            axios.get('usuario/info').then(response => {
+                if (response.data.estatus) {
+                    next();
+                } else {
+                    next('/page-error');
+                }
+            }).catch(error => {
+                if (error.response.status == 401) {
+                    console.log('Unauthorized');
+                }
+                if (error.response.status == 419) {
+                    console.log('CFRC');
+                }
+                if (error.response.status == 500) {
+                    console.log('Server Error');
+                }
+            });
+        }
+    },
+    {
+        path: '/usuarios',
+        component: UsuariosAdm,
+        name: 'usuariosadm',
+        beforeEnter: (to, from, next) => {
+            axios.get('usuario/info').then(response => {
+                if (response.data.estatus && response.data.nivel >= 3) {
+                    next();
+                } else {
+                    next('/page-error');
+                }
+            }).catch(error => {
+                if (error.response.status == 401) {
+                    console.log('Unauthorized');
+                }
+                if (error.response.status == 419) {
+                    console.log('CFRC');
+                }
+                if (error.response.status == 500) {
+                    console.log('Server Error');
+                }
+            });
+        }
+    },
+    {
+        path: '/estaciones',
+        component: EstacionesAdm,
+        name: 'estacionesRadio',
+        beforeEnter: (to, from, next) => {
+            axios.get('usuario/info').then(response => {
+                if (response.data.estatus && response.data.nivel >= 3) {
                     next();
                 } else {
                     next('/page-error');

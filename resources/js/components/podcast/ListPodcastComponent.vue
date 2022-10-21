@@ -2,27 +2,41 @@
 <v-skeleton-loader transition="scale-transition" type="table" class="mx-auto" :loading="loading">
     <v-card>
         <v-card-title>
-            <v-text-field v-model="vmodel_buscar" hide-details class="col-12 col-md-4 col-lg-4" prepend-inner-icon="mdi-magnify" label="Buscar Podcast"></v-text-field>
+            <v-text-field v-model="vmodel_buscar"
+             hide-details class="col-12 col-md-4 col-lg-4"
+             prepend-inner-icon="mdi-magnify"
+             @keyup.enter="buscar(vmodel_buscar)"
+             label="Buscar Podcast">
+            </v-text-field>
             <v-spacer></v-spacer>
             <v-btn color="primary" outlined dark :to="{name: 'podcastAdd'}">Agregar Podcast</v-btn>
         </v-card-title>
 
         <v-card elevation="0">
             <v-tabs v-model="vmodel_tab">
-                <v-tab>Publicados ({{ getCount.publish }})</v-tab>
+                <v-tab>Publicados ({{ itemsCount }})</v-tab>
                 <v-tab>Borradores ({{ getCount.trash }})</v-tab>
-                <v-tab>Papelera ({{ getCount.delete }})</v-tab>
+                <v-tab v-show="false">Papelera ({{ getCount.delete }})</v-tab>
             </v-tabs>
 
             <v-tabs-items v-model="vmodel_tab">
                 <v-tab-item>
-                    <podcast-data-table></podcast-data-table>
+                    <!-- <podcast-data-table/> -->
+                    <DataTablePodcast2Vue v-if="vmodel_tab ==0"
+                    :listar="all"
+                    />
                 </v-tab-item>
                 <v-tab-item>
-                    <podcast-data-table></podcast-data-table>
+                    <!-- <podcast-data-table/> -->
+                    <DataTablePodcast2Vue v-if="vmodel_tab ==1"
+                    :listar="trash"
+                    />
                 </v-tab-item>
                 <v-tab-item>
-                    <podcast-data-table></podcast-data-table>
+                    <!-- <podcast-data-table/> -->
+                    <DataTablePodcast2Vue v-if="vmodel_tab ==2"
+                    :listar="remove"
+                    />
                 </v-tab-item>
             </v-tabs-items>
         </v-card>
@@ -31,16 +45,23 @@
 </template>
 
 <script>
+    import DataTablePodcast2Vue from "./DataTablePodcast2.vue";
 import {
-    mapState,
+    mapActions,
     mapMutations,
     mapGetters
 } from "vuex";
 
 export default {
     props: [],
-    components: {},
+    components: {
+        DataTablePodcast2Vue
+    },
     data: () => ({
+        all: 'all',
+        trash: 'trash',
+        remove: 'remove',
+
         loading: true,
         selected: [],
         vmodel_buscar: '',
@@ -51,31 +72,30 @@ export default {
         this.$store.dispatch('countPodcast');
         this.publicados();
     },
-    mounted() {},
     computed: {
         ...mapGetters(['getCount', 'getDialogConfirStatus']),
-    },
-    watch: {
-        vmodel_tab(val) {
-            if (val == 0) {
-                this.publicados();
-            } else if (val == 1) {
-                this.borradores();
-            } else if (val == 2) {
-                this.papelera();
-            }
-        }, 
-
-        vmodel_buscar(val) {
-            this.setTextSearch(val);
-        }
+        ...mapGetters('cat',['getTablas']),
+        itemsCount: {
+            get() {     return this.getTablas.total },
+            set() {     return this.getTablas.total }
+        },
     },
     methods: {
-        ...mapMutations(['setTextSearch', 'setDesserts']),
-
+        ...mapMutations(['setTextSearch', 'setDesserts', 'setTab']),
+        ...mapActions('cat',['buscarTablas']),
+        buscar() {
+            this.buscarTablas({
+                palabra: this.vmodel_buscar,
+                pagina: 1
+            })
+        },
         publicados() {
+            console.log('Publicados')
+
             this.setDesserts([]);
+
             axios.get('podcast/list/all').then(response => {
+                console.log(response.data)
                 if (!response.data.answer) {
                     this.setDesserts(response.data);
                     this.loading = false;
@@ -100,8 +120,12 @@ export default {
         },
 
         borradores() {
+            console.log('Borradores')
+
             this.setDesserts([]);
             axios.get('podcast/list/trash').then(response => {
+                console.log(response.data)
+
                 if (!response.data.answer) {
                     this.setDesserts(response.data);
                     this.loading = false;
@@ -128,6 +152,7 @@ export default {
         papelera() {
             this.setDesserts([]);
             axios.get('podcast/list/remove').then(response => {
+                console.log(response.data)
                 if (!response.data.answer) {
                     this.setDesserts(response.data);
                     this.loading = false;
@@ -152,4 +177,5 @@ export default {
         },
     },
 }
+
 </script>

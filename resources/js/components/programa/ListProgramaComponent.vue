@@ -2,7 +2,13 @@
 <v-skeleton-loader transition="scale-transition" type="table" class="mx-auto" :loading="loading">
     <v-card>
         <v-card-title>
-            <v-text-field v-model="vmodel_buscar" hide-details class="col-12 col-md-4 col-lg-4" prepend-inner-icon="mdi-magnify" label="Buscar Programa"></v-text-field>
+            <v-text-field
+                v-model="vmodel_buscar"
+                hide-details class="col-12 col-md-4 col-lg-4"
+                prepend-inner-icon="mdi-magnify"
+                @keyup.enter="buscar(vmodel_buscar)"
+                label="Buscar Programa">
+            </v-text-field>
             <v-spacer></v-spacer>
             <v-btn color="primary" outlined dark :to="{name: 'programaAdd'}">Agregar Programa</v-btn>
         </v-card-title>
@@ -11,18 +17,24 @@
             <v-tabs v-model="vmodel_tab">
                 <v-tab>Publicados ({{ getCount.publish }})</v-tab>
                 <v-tab>Borradores ({{ getCount.trash }})</v-tab>
-                <v-tab>Papelera ({{ getCount.delete }})</v-tab>
+                <v-tab v-show="false">Papelera ({{ getCount.delete }})</v-tab>
             </v-tabs>
 
             <v-tabs-items v-model="vmodel_tab">
                 <v-tab-item>
-                    <programa-data-table></programa-data-table>
+                    <DataTable2Vue v-if="vmodel_tab ==0"
+                    :listar="all"/>
+                    <!-- <programa-data-table></programa-data-table> -->
                 </v-tab-item>
-                <v-tab-item>
-                    <programa-data-table></programa-data-table>
+                <v-tab-item >
+                    <DataTable2Vue  v-if="vmodel_tab ==1"
+                    :listar="trash"/>
+                    <!-- <programa-data-table></programa-data-table> -->
                 </v-tab-item>
-                <v-tab-item>
-                    <programa-data-table></programa-data-table>
+                <v-tab-item v-show="false">
+                    <DataTable2Vue
+                    :listar="remove"/>
+                    <!-- <programa-data-table></programa-data-table> -->
                 </v-tab-item>
             </v-tabs-items>
         </v-card>
@@ -31,16 +43,23 @@
 </template>
 
 <script>
+    import DataTable2Vue from "./DataTable2.vue";
 import {
     mapState,
     mapMutations,
-    mapGetters
+    mapGetters,
+    mapActions
 } from "vuex";
 
 export default {
     props: [],
-    components: {},
+    components: {
+        DataTable2Vue
+    },
     data: () => ({
+        all: 'all',
+        trash: 'trash',
+        remove: 'remove',
         loading: true,
         selected: [],
         vmodel_buscar: '',
@@ -65,7 +84,7 @@ export default {
                 this.papelera();
             }
             this.setTab(val);
-        }, 
+        },
 
         vmodel_buscar(val) {
             this.setTextSearch(val);
@@ -73,10 +92,17 @@ export default {
     },
     methods: {
         ...mapMutations(['setTextSearch', 'setDesserts', 'setTab']),
-
+        ...mapActions('cat',['buscarTablas']),
+        buscar() {
+            this.buscarTablas({
+                palabra: this.vmodel_buscar,
+                pagina: 1
+            })
+        },
         publicados() {
             this.setDesserts([]);
             axios.get('programa/list/all').then(response => {
+                // console.log('publicados', response.data)
                 if (!response.data.answer) {
                     this.setDesserts(response.data);
                     this.loading = false;
@@ -103,6 +129,7 @@ export default {
         borradores() {
             this.setDesserts([]);
             axios.get('programa/list/trash').then(response => {
+                    // console.log('borradores', response.data)
                 if (!response.data.answer) {
                     this.setDesserts(response.data);
                     this.loading = false;

@@ -1,29 +1,9 @@
 <template>
 <!-- v-model="selected" show-select  -->
 <!-- :single-expand="singleExpand" :expanded.sync="expanded" show-expand item-key="id" -->
-<v-data-table :headers="headers" :search="getTextSearch" :items="getDesserts" class="elevation-0" :items-per-page="10" :footer-props="{'items-per-page-options': [10, 20, 30, 40, 50, -1]}">
-    <!-- <template v-slot:expanded-item="{ item }">
-        <td colspan="12" class="pa-0">
-            <v-simple-table style="width:100%" class="elevation-4">
-                <template v-slot:default>
-                    <thead>
-                        <tr class="grey lighten-3">
-                            <th>Estacion(es) de Radio</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <v-chip class="ma-2" color="primary" small v-for="estacion in item.estacion" :key="estacion.id">
-                                    {{estacion.estacion}}
-                                </v-chip>
-                            </td>
-                        </tr>
-                    </tbody>
-                </template>
-            </v-simple-table>
-        </td>
-    </template> -->
+<v-data-table :headers="headers" :search="getTextSearch"
+:items="getDesserts" class="elevation-0" :items-per-page="10"
+:footer-props="{'items-per-page-options': [10, 20, 30, 40, 50, -1]}">
 
     <template v-slot:[`item.categoria`]="{ item }">
         <div class="col-8 text-truncate">{{ item.categoria }}</div>
@@ -32,6 +12,12 @@
     <template v-slot:[`item.usuario`]="{ item }">
         <v-chip class="ma-2" color="primary" outlined>
             {{item.usuario}}
+        </v-chip>
+    </template>
+
+    <template v-slot:[`item.productor`]="{ item }">
+        <v-chip class="ma-2" color="purple" outlined>
+            {{item.productor}}
         </v-chip>
     </template>
 
@@ -46,33 +32,39 @@
             {{item.name_estatus}}
         </v-chip>
     </template>
+    <template v-slot:[`item.programa`]="{ item }">
+        <v-chip class="ma-2" color="orange" outlined>
+            {{item.programa}}
+        </v-chip>
+
+    </template>
 
     <template v-slot:[`item.actions`]="{ item }">
         <span v-if="item.estatus == 1 || item.estatus == 2">
-            <!-- <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
-                    <v-icon class="mr-2" v-bind="attrs" v-on="on" @click="verItem(item)">mdi-eye</v-icon>
-                </template>
-                <span>Ver {{item.titulo}}</span>
-            </v-tooltip> -->
+
             <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
                     <v-icon class="mr-2" v-bind="attrs" v-on="on" @click="editItem(item)">mdi-pencil</v-icon>
                 </template>
-                <span>Editar {{item.titulo}}</span>
+                <span> Editar {{item.titulo}}
+                </span>
             </v-tooltip>
+
             <v-tooltip top v-if="item.estatus == 2">
                 <template v-slot:activator="{ on, attrs }">
                     <v-icon class="mr-2" v-bind="attrs" v-on="on" @click="publishItem(item)">mdi-check-bold</v-icon>
                 </template>
-                <span>Publicar {{item.titulo}}</span>
+                <span> Publicar {{item.titulo}}
+                </span>
             </v-tooltip>
+
         </span>
 
         <span v-if="item.estatus == 1">
             <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
                     <v-icon class="mr-2" v-bind="attrs" v-on="on" @click="borradorItem(item)">mdi-eraser</v-icon>
+
                 </template>
                 <span>Borrador {{item.titulo}}</span>
             </v-tooltip>
@@ -81,7 +73,7 @@
         <span v-if="item.estatus == 1 || item.estatus == 2">
             <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
-                    <v-btn color="error" v-bind="attrs" v-on="on" fab x-small @click="confirmarPapeleraItem(item, 'trash')">
+                    <v-btn v-if="infoUsuario.nivel > 2" color="error" v-bind="attrs" v-on="on" fab x-small @click="confirmarPapeleraItem(item, 'trash')">
                         <v-icon>mdi-delete</v-icon>
                     </v-btn>
                 </template>
@@ -100,7 +92,7 @@
             </v-tooltip>
             <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
-                    <v-btn color="error" v-bind="attrs" v-on="on" fab x-small @click="confirmarPermanenteItem(item, 'remove')">
+                    <v-btn  v-if="infoUsuario.nivel > 2" color="error" v-bind="attrs" v-on="on" fab x-small @click="confirmarPermanenteItem(item, 'remove')">
                         <v-icon>mdi-delete</v-icon>
                     </v-btn>
                 </template>
@@ -127,23 +119,19 @@ export default {
     props: [],
     components: {},
     data: () => ({
-        headers: [{
+        headers: [
+            {
                 text: 'Título',
                 value: 'titulo',
-                width: '120',
+                width: '20%',
             },
             {
                 text: 'Programa',
                 value: 'programa',
-                width: '320',
             },
             {
-                text: 'Categoría',
-                value: 'categoria',
-            },
-            {
-                text: 'Usuario',
-                value: 'usuario'
+                text: 'Productor',
+                value: 'productor',
             },
             {
                 text: 'Fecha publicación',
@@ -156,7 +144,8 @@ export default {
             {
                 text: 'Acciones',
                 value: 'actions',
-                sortable: false
+                sortable: false,
+                width: '18%'
             },
         ],
         selected: [],
@@ -167,9 +156,15 @@ export default {
     }),
     beforeCreate() {},
     created() {},
-    mounted() {},
+    mounted() {
+        console.log(this.getDesserts)
+    },
     computed: {
         ...mapGetters(['getTextSearch', 'getDesserts', 'getTab', 'getDialogConfirStatus']),
+        ...mapGetters(['infoUsuario',]),
+        ...mapState({
+        user: ({ auth: { info_usuario } }) => info_usuario,
+        }),
     },
     watch: {
         getDialogConfirStatus(val) {
@@ -237,6 +232,7 @@ export default {
 
         papelera() {
             //this.setDessertsPrograma([]);
+            console.log('papelera')
             axios.get('podcast/list/remove').then(response => {
                 if (!response.data.answer) {
                     this.setDesserts(response.data);
@@ -311,6 +307,7 @@ export default {
         },
 
         deletePapeleraItem(item) {
+            console.log('boton eliminar')
             axios.post('podcast/trash', {
                 token: item.token,
             }).then(response => {

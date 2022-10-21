@@ -1,3 +1,5 @@
+
+
 const state = {
     colorMessage: '',
     snackbarMessage: false,
@@ -46,7 +48,16 @@ const getters = {
 const actions = {
     sanckbarsMessage(context, info) {
         context.commit('setSnackbarMessage', info);
-    }
+    },
+    mensajeNotificacion(mensaje) {
+        // return console.log('dentro del modulo')
+        // commit('setEnviarMensaje', msj)
+        $trueFalso = mensaje.data.answer
+        $mensajeRes = mensaje.data.msg
+        $color = (mensaje.data.answer == true) ? 'success' : 'error'
+        this.$store.dispatch('sanckbarsMessage', [$mensajeRes, $color, $trueFalso, '', ['top', 'right']]);
+        // sanckbarsMessage', [response.data.msg, 'success', true, '', ['top', 'right']]);
+    },
 };
 
 const mutations = {
@@ -68,7 +79,7 @@ const mutations = {
                         state.top = true;
                         break;
                     case 'bottom':
-                        state.bottom = true; 
+                        state.bottom = true;
                         break;
                 }
             });
@@ -88,7 +99,7 @@ const mutations = {
     setLeft(state, boolean) {
         state.left = boolean;
     },
-    
+
     setRight(state, boolean) {
         state.right = boolean;
     },
@@ -103,6 +114,7 @@ const mutations = {
 };
 
 export default {
+//   namespaced: true,
     state,
     getters,
     actions,

@@ -6,6 +6,9 @@
                 <h2>Categorías</h2>
             </v-chip>
             <v-divider></v-divider>
+            <v-container>
+                <dataTablesCategorias/>
+            </v-container>
         </v-col>
     </v-row>
     <v-row>
@@ -16,9 +19,12 @@
 </template>
 
 <script>
+    import dataTablesCategorias from '../../components/categorias/Datatables'
 export default {
     props: [],
-    components: {},
+    components: {
+        dataTablesCategorias
+    },
     data: () => ({}),
     beforeCreate() {},
     created() {},

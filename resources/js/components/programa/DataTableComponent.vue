@@ -1,34 +1,44 @@
 <template>
 <!-- v-model="selected" show-select  -->
 <!-- :single-expand="singleExpand" :expanded.sync="expanded" show-expand item-key="id" -->
-<v-data-table :headers="headers" :search="getTextSearch" :items="getDesserts" class="elevation-0" :items-per-page="10" :footer-props="{'items-per-page-options': [10, 20, 30, 40, 50, -1]}">
-    <!-- <template v-slot:expanded-item="{ item }">
-        <td colspan="12" class="pa-0">
-            <v-simple-table style="width:100%" class="elevation-4">
-                <template v-slot:default>
-                    <thead>
-                        <tr class="grey lighten-3">
-                            <th>Estacion(es) de Radio</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <v-chip class="ma-2" color="primary" small v-for="estacion in item.estacion" :key="estacion.id">
-                                    {{estacion.estacion}}
-                                </v-chip>
-                            </td>
-                        </tr>
-                    </tbody>
-                </template>
-            </v-simple-table>
-        </td>
-    </template> -->
+<v-data-table
+:headers="headers"
+:search="getTextSearch"
+:items="getDesserts"
+class="elevation-0"
+:items-per-page="10"
+:footer-props="{'items-per-page-options':
+ [10, 20, 30, 40, 50, -1]}">
 
     <template v-slot:[`item.usuario`]="{ item }">
         <v-chip class="ma-2" color="primary" outlined>
             {{item.usuario}}
         </v-chip>
+    </template>
+    <template v-slot:[`item.estaciones_ids`]="{ item }">
+        <v-tooltip bottom color="success">
+            <template v-slot:activator="{ on, attrs }">
+
+                    <v-chip class="ma-2" outlined
+                    color="primary"
+                    dark
+                    v-bind="attrs"
+                    v-on="on"
+                    >
+                    <v-badge
+                        color="primary"
+                        :content="item.estaciones_lista.length"
+                        overlap
+                        inline
+                        >
+                        Estaciones
+                    </v-badge>
+                    </v-chip>
+            </template>
+            <span v-for="(it, index) in item.estaciones_lista" :key="index">
+                {{it}} - {{setEstaciones(it)}}<br/>
+            </span>
+        </v-tooltip>
     </template>
 
     <template v-slot:[`item.name_estatus`]="{ item }">
@@ -45,12 +55,6 @@
 
     <template v-slot:[`item.actions`]="{ item }">
         <span v-if="item.estatus == 1 || item.estatus == 2">
-            <!-- <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
-                    <v-icon class="mr-2" v-bind="attrs" v-on="on" @click="verItem(item)">mdi-eye</v-icon>
-                </template>
-                <span>Ver {{item.titulo}}</span>
-            </v-tooltip> -->
             <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
                     <v-icon class="mr-2" v-bind="attrs" v-on="on" @click="editItem(item)">mdi-pencil</v-icon>
@@ -70,14 +74,14 @@
                 <template v-slot:activator="{ on, attrs }">
                     <v-icon class="mr-2" v-bind="attrs" v-on="on" @click="borradorItem(item)">mdi-eraser</v-icon>
                 </template>
-                <span>Borrador {{item.titulo}}</span>
+                <span>Mover a Borrador {{item.titulo}}</span>
             </v-tooltip>
         </span>
 
         <span v-if="item.estatus == 1 || item.estatus == 2">
             <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
-                    <v-btn color="error" v-bind="attrs" v-on="on" fab x-small @click="confirmarPapeleraItem(item, 'trash')">
+                    <v-btn v-if="infoUsuario.nivel > 2" color="error" v-bind="attrs" v-on="on" fab x-small @click="confirmarPapeleraItem(item, 'trash')">
                         <v-icon>mdi-delete</v-icon>
                     </v-btn>
                 </template>
@@ -96,7 +100,7 @@
             </v-tooltip>
             <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
-                    <v-btn color="error" v-bind="attrs" v-on="on" fab x-small @click="confirmarPermanenteItem(item, 'remove')">
+                    <v-btn v-if="infoUsuario.nivel > 2" color="error" v-bind="attrs" v-on="on" fab x-small @click="confirmarPermanenteItem(item, 'remove')">
                         <v-icon>mdi-delete</v-icon>
                     </v-btn>
                 </template>
@@ -124,26 +128,19 @@ export default {
     components: {},
     data: () => ({
         headers: [
-        // { 
-        //     text: '', 
-        //     value: "data-table-expand" 
-        // },
+
         {
             text: 'Título',
             value: 'titulo',
-            width: '550',
+            width: '25%',
         },
         {
             text: 'Estación Radio',
-            value: 'estacion',
-        },
-        { 
-            text: 'Autor', 
-            value: "autor" 
+            value: 'estaciones_id',
         },
         {
-            text: 'Usuario',
-            value: 'usuario'
+            text: 'Autor',
+            value: "autor"
         },
         {
             text: 'Fecha publicación',
@@ -156,7 +153,8 @@ export default {
         {
             text: 'Acciones',
             value: 'actions',
-            sortable: false
+            sortable: false,
+            width:'18%'
         },
     ],
         selected: [],
@@ -164,12 +162,19 @@ export default {
         accion: '',
         singleExpand: false,
         expanded: [],
+        estaciones:[],
     }),
-    beforeCreate() {},
-    created() {},
+    created() {
+        this.cargarEstaciones();
+    },
     mounted() {},
     computed: {
         ...mapGetters(['getTextSearch', 'getDesserts', 'getTab', 'getDialogConfirStatus']),
+        ...mapGetters(['infoUsuario',]),
+        ...mapState({
+        user: ({ auth: { info_usuario } }) => info_usuario,
+        }),
+
     },
     watch: {
         getDialogConfirStatus(val) {
@@ -180,7 +185,19 @@ export default {
     },
     methods: {
         ...mapMutations(['setDesserts', 'setDialogConfirStatus']),
+        async cargarEstaciones() {
+            await axios.get('estaciones/list').then(response => {
+                this.estaciones= response.data;
+                // console.log('Cargar Estaciones: ',this.estaciones)
+        })
 
+        },
+        setEstaciones(id) {
+            let getEstacion
+            if (getEstacion= this.estaciones.find(item => item.id == id))
+                return getEstacion.estacion
+            return 'Sin Estacion'
+        },
         publicados() {
             //this.setDessertsPrograma([]);
             axios.get('programa/list/all').then(response => {
@@ -269,6 +286,8 @@ export default {
         },
 
         confirmarPapeleraItem(item, accion) {
+
+            // console.log(item)
             axios.post('programa/records', {
                 token: item.token,
             }).then(response => {
@@ -407,9 +426,12 @@ export default {
         },
 
         publishItem(item) {
+            // console.log('Click en publicar ', item);
             axios.post('programa/publish', {
+                id: item.id,
                 token: item.token,
             }).then(response => {
+                // console.log(response.data)
                 if (response.data.answer) {
                     this.$store.dispatch('sanckbarsMessage', [response.data.msg, 'success', true, '', []]);
                     this.borradores();
@@ -437,8 +459,11 @@ export default {
 
         borradorItem(item) {
             axios.post('programa/eraser', {
+                id: item.id,
                 token: item.token,
             }).then(response => {
+                // console.log('el item es ',item)
+                // console.log('CLick en borrador', response.data);
                 if (response.data.answer) {
                     this.$store.dispatch('sanckbarsMessage', [response.data.msg, 'success', true, '', []]);
                     this.publicados();
